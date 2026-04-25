@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plano de Treino — Paula</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0d0d;
+    --surface: #161616;
+    --card: #1e1e1e;
+    --border: #2a2a2a;
+    --accent: #e8ff47;
+    --accent2: #ff6b35;
+    --accent3: #47c4ff;
+    --text: #f0f0f0;
+    --muted: #888;
+    --done: #3a3a3a;
+    --done-text: #555;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* NOISE TEXTURE */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem 1.25rem 4rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* HEADER */
+  header {
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(1.8rem, 5vw, 2.8rem);
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+
+  .logo span { color: var(--accent); }
+
+  .goal-badge {
+    background: var(--accent);
+    color: #000;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 0.4rem 0.9rem;
+    border-radius: 100px;
+    white-space: nowrap;
+    align-self: center;
+  }
+
+  .subtitle {
+    margin-top: 0.6rem;
+    font-size: 0.9rem;
+    color: var(--muted);
+    font-weight: 300;
+  }
+
+  /* PROGRESS BAR */
+  .progress-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .progress-label {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  .progress-bar-wrap {
+    flex: 1;
+    min-width: 150px;
+    height: 6px;
+    background: var(--border);
+    border-radius: 100px;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 100px;
+    transition: width 0.6s ease;
+  }
+
+  .progress-count {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .tab {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.55rem 1.2rem;
+    border-radius: 100px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .tab:hover { border-color: var(--accent); color: var(--accent); }
+  .tab.active { background: var(--accent); color: #000; border-color: var(--accent); }
+
+  /* PANELS */
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* WEEK SECTION */
+  .week-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    margin-top: 2rem;
+  }
+
+  .week-header:first-child { margin-top: 0; }
+
+  .week-label {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .week-line {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* DAY CARD */
+  .day-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 0.6rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .day-card::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: var(--type-color, var(--accent));
+    border-radius: 3px 0 0 3px;
+  }
+
+  .day-card:hover { border-color: var(--type-color, var(--accent)); transform: translateX(2px); }
+
+  .day-card.completed {
+    background: var(--done);
+    border-color: var(--done);
+    opacity: 0.6;
+  }
+
+  .day-card.completed .day-name,
+  .day-card.completed .workout-name,
+  .day-card.completed .workout-detail { color: var(--done-text); }
+
+  .day-card.completed::before { background: var(--done-text); }
+
+  .check-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    background: transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s;
+    font-size: 0.8rem;
+  }
+
+  .day-card:not(.completed) .check-btn:hover {
+    border-color: var(--type-color, var(--accent));
+    background: var(--type-color, var(--accent));
+    color: #000;
+  }
+
+  .day-card.completed .check-btn {
+    background: var(--done-text);
+    border-color: var(--done-text);
+    color: var(--bg);
+  }
+
+  .day-info { flex: 1; min-width: 0; }
+
+  .day-name {
+    font-size: 0.72rem;
+    color: var(--muted);
+    font-weight: 300;
+    margin-bottom: 0.15rem;
+  }
+
+  .workout-name {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 0.95rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .workout-detail {
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-top: 0.15rem;
+    font-style: italic;
+  }
+
+  .type-chip {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.25rem 0.6rem;
+    border-radius: 100px;
+    background: color-mix(in srgb, var(--type-color, var(--accent)) 15%, transparent);
+    color: var(--type-color, var(--accent));
+    flex-shrink: 0;
+  }
+
+  /* MUSCULAÇÃO PANEL */
+  .gym-section { margin-bottom: 2.5rem; }
+
+  .gym-section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .gym-section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .exercise-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 0.5rem;
+    display: grid;
+    grid-template-columns: 1fr auto auto auto;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .exercise-name {
+    font-weight: 500;
+    font-size: 0.9rem;
+  }
+
+  .exercise-meta {
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-top: 0.15rem;
+    font-style: italic;
+  }
+
+  .ex-chip {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.2rem 0.55rem;
+    border-radius: 100px;
+  }
+
+  .ex-chip.compound { background: #ff6b3520; color: var(--accent2); }
+  .ex-chip.iso { background: #47c4ff20; color: var(--accent3); }
+  .ex-chip.core { background: #e8ff4720; color: var(--accent); }
+
+  .sets-info {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text);
+    white-space: nowrap;
+  }
+
+  /* REST DAY */
+  .rest-card {
+    background: var(--surface);
+    border: 1px dashed var(--border);
+    border-radius: 14px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 0.6rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    opacity: 0.5;
+  }
+
+  .rest-icon { font-size: 1.2rem; }
+  .rest-text { font-size: 0.85rem; color: var(--muted); font-style: italic; }
+
+  /* RACE COUNTDOWN */
+  .race-banner {
+    background: linear-gradient(135deg, #1a1a00, #1a0d00);
+    border: 1px solid var(--accent);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .race-icon { font-size: 2rem; }
+
+  .race-info { flex: 1; }
+
+  .race-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.1rem;
+    color: var(--accent);
+    margin-bottom: 0.25rem;
+  }
+
+  .race-date { font-size: 0.85rem; color: var(--muted); }
+
+  .race-countdown {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 2rem;
+    color: var(--accent);
+    text-align: center;
+  }
+
+  .race-countdown-label {
+    font-size: 0.65rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-align: center;
+  }
+
+  /* MOBILE */
+  @media (max-width: 600px) {
+    .exercise-card { grid-template-columns: 1fr auto; }
+    .ex-chip { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="header-top">
+      <div class="logo">treino<span>.</span></div>
+      <div class="goal-badge">🏃 Meta: Corrida do Café 10k</div>
+    </div>
+    <p class="subtitle">Plano completo — corrida · musculação · yoga · 17 maio 2026</p>
+  </header>
+
+  <div class="race-banner">
+    <div class="race-icon">☕</div>
+    <div class="race-info">
+      <div class="race-title">8ª Corrida do Café</div>
+      <div class="race-date">17 de maio de 2026 · Centro Histórico, São Paulo · 10k</div>
+    </div>
+    <div>
+      <div class="race-countdown" id="countdown">—</div>
+      <div class="race-countdown-label">dias</div>
+    </div>
+  </div>
+
+  <div class="progress-section">
+    <div class="progress-label">Treinos concluídos</div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progressFill" style="width: 0%"></div>
+    </div>
+    <div class="progress-count" id="progressCount">0 / 0</div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('semanas')">Semanas</button>
+    <button class="tab" onclick="switchTab('musculacao')">Musculação</button>
+  </div>
+
+  <!-- SEMANAS PANEL -->
+  <div id="panel-semanas" class="panel active">
+
+    <div class="week-header">
+      <span class="week-label">Semana 1 · 25 abr — início</span>
+      <div class="week-line"></div>
+    </div>
+
+    <div class="day-card" style="--type-color: #ff6b35" id="d6" onclick="toggleDay('d6')">
+      <button class="check-btn">✓</button>
+      <div class="day-info">
+        <div class="day-name">Sábado · 25 abr · São Paulo</div>
+        <div class="workout-name">🏃 Corrida 5k — leve</div>
+        <div class="workout-detail">Primeiro treino de volta · ritmo conversável</div>
+      </div>
+      <div class="type-chip">Corrida</div>
+    </div>
+
+    <div class="rest-card">
+      <div class="rest-icon">😴</div>
+      <div class="rest-text">Domingo · descanso total</div>
+    </div>
+
+    <div class="week-header">
+      <span class="week-label">Semana viagem · 27 abr–4 mai · ✈️ Piracicaba + Buenos Aires</span>
+      <div class="week-line"></div>
+    </div>
+
+    <div class="day-card" style="--type-color: #e8ff47" id="d1" onclick="toggleDay('d1')">
+      <button class="check-btn">✓</button>
+      <div class="day-info">
+        <div class="day-name">Segunda · 27 abr · 📍 Piracicaba</div>
+        <div class="workout-name">💪 Musculação — Membros Inferiores</div>
+        <div class="workout-detail">Academia local · glúteo, quadríceps, posterior</div>
+      </div>
+      <div class="type-chip">Força</div>
+    </div>
+
+    <div class="day-card" style="--type-color: #ff6b35" id="d2" onclick="toggleDay('d2')">
+      <button class="check-btn">✓</button>
+      <div class="day-info">
+        <div class="day-name">Terça · 28 abr · 📍 Piracicaba</div>
+        <div class="workout-name">🏃 Corrida 6k — rua</div>
+        <div class="workout-detail">Corrida ao ar livre · ritmo leve · pausas se precisar</div>
+      </div>
+      <div class="type-chip">Corrida</div>
+    </div>
+
+    <div class="day-card" style="--type-color: #47c4ff" id="d3" onclick="toggleDay('d3')">
+      <button class="check-btn">✓</button>
+      <div class="day-info">
+        <div class="day-name">Quarta · 29 abr · 📍 Piracicaba</div>
+        <div class="workout-name">💪 Musculação — Core + Superiores</div>
+        <div class="workout-detail">Academia local · abdômen, lombar, costas, ombros</div>
+      </div>
+      <div class="type-chip">Força</div>
+    </div>
+
+    <div class="day-card" style="--type-color: #ff6b35" id="d4" onclick="toggleDay('d4')">
+      <button class="check-btn">✓</button>
+      <div class="day-info">
+        <div class="day-name">Quinta · 01 mai · 📍 Buenos Aires</div>
+        <div class="workout-name">🏃 Corrida 6k — Parque Tres de Febrero</div>
+        <div class="workout-detail">Palermo · um dos parques mais lindos da América do Sul 🌿</div>
+      </div>
+      <div class="type-chip">Corrida</div>
+    </div>
+
+    <div class="day-card" style="--type-color: #e8ff47" id="d5" onclick="toggleDay('d5')">
+      <button class="check-btn">✓</button>
+      <div class="day-info">
+        <div class="day-name">Sexta · 02 mai · 📍 Buenos Aires</div>
+        <div class="workout-name">💪 Musculação — Full Body Leve</div>
+        <div class="workout-detail">Academia do Hotel Shoshana · volume baixo</div>
+      </div>
+      <div class="type-chip">Força</div>
+    </div>
+
+    <div class="day-card" style="--type-color: #ff6b35" id="d6b" onclick="toggleDay('d6b')">
+      <button class="check-btn">✓</button>
+      <div class="day-info">
+        <div class="day-name">Sábado · 03 mai · 📍 Buenos Aires</div>
+        <div class="workout-name">🏃 Corrida 5k — Palermo</div>
+        <div class="workout-detail">Ritmo confortável · aproveita a cidade correndo</div>
+      </div>
+      <div class="type-chip">Corrida</div>
+    </div>
+
+    <div class="rest-card">
+      <div class="rest-icon">✈️</div>
+      <div class="rest-text">Domingo · descanso / viagem de volta</div>
+    </div>
+
+    <div class="week-header">
+      <span class="week-label">Semana 2 · 5–10 mai · de volta a SP</span>
+      <div class="week-line"></div>
+    </div>
+
+    <div class="day-card" style="--type-color: #e8ff47" id="d7" onclick="toggleDay('d7')">
+      <button class="check-btn">✓</button>
+      <div class="day-info">
+        <div class="day-name">Segunda · 05 mai · São Paulo</div>
+        <div class="workout-name">💪 Musculação — Membros Inferiores</div>
+        <div class="workout-detail">De volta à academia · foco em glúteo e posterior</div>
+      </div>
+      <div class="type-chip">Força</div>
+    </div>
+
+    <div class="day-card" style="--type-color: #ff6b35" id="d8" onclick="toggleDay('d8')">
+      <button class="check-btn">✓</button>
+      <div class="day-info">
+        <div class="day-name">Terça · 06 mai</div>
+        <div class="workout-name">🏃 Corrida 6k + 🧘 Yoga 19/20h</div>
+        <div class="workout-detail">Ritmo leve · yoga ajuda na recuperação pós-viagem</div>
+      </div>
+      <div class="type-chip">Duplo</div>
+    </div>
+
+    <div class="day-card" style="--type-color: #47c4ff" id="d9" onclick="toggleDay('d9')">
+      <button class="check-btn">✓</button>
+      <div class="day-info">
+        <div class="day-name">Quarta · 07 mai</div>
+        <div class="workout-name">💪 Musculação — Core + Superiores</div>
+        <div class="workout-detail">Prancha, remada, desenvolvimento</div>
+      </div>
+      <div class="type-chip">Força</div>
+    </div>
+
+    <div class="day-card" style="--type-color: #ff6b35" id="d10" onclick="toggleDay('d10')">
+      <button class="check-btn">✓</button>
+      <div class="day-info">
+        <div class="day-name">Quinta · 08 mai</div>
+        <div class="workout-name">🏃 Corrida 7k (longão) + 🧘 Yoga 19/20h</div>
+        <div class="workout-detail">Mais longo até agora · vá devagar</div>
+      </div>
+      <div class="type-chip">Duplo</div>
+    </div>
+
+    <div class="day-card" style="--type-color: #e8ff47" id="d11" onclick="toggleDay('d11')">
+      <button class="check-btn">✓</button>
+      <div class="day-info">
+        <div class="day-name">Sexta · 09 mai</div>
+        <div class="workout-name">💪 Musculação — Full Body Leve</div>
+        <div class="workout-detail">Recuperação ativa · sem exagerar</div>
+      </div>
+      <div class="type-chip">Força</div>
+    </div>
+
+    <div class="day-card" style="--type-color: #ff6b35" id="d12" onclick="toggleDay('d12')">
+      <button class="check-btn">✓</button>
+      <div class="day-info">
+        <div class="day-name">Sábado · 10 mai</div>
+        <div class="workout-name">🏃 Corrida 5k — confortável</div>
+        <div class="workout-detail">Fácil, recuperação · termina sentindo que tinha mais</div>
+      </div>
+      <div class="type-chip">Corrida</div>
+    </div>
+
+    <div class="rest-card">
+      <div class="rest-icon">😴</div>
+      <div class="rest-text">Domingo · descanso total</div>
+    </div>
+
+    <div class="week-header">
+      <span class="week-label">Semana 3 · 11–17 mai · última antes da prova</span>
+      <div class="week-line"></div>
+    </div>
+
+    <div class="day-card" style="--type-color: #e8ff47" id="d13" onclick="toggleDay('d13')">
+      <button class="check-btn">✓</button>
+      <div class="day-info">
+        <div class="day-name">Segunda · 11 mai</div>
+        <div class="workout-name">💪 Musculação — Membros Inferiores</div>
+        <div class="workout-detail">Última semana pesada antes do tapering</div>
+      </div>
+      <div class="type-chip">Força</div>
+    </div>
+
+    <div class="day-card" style="--type-color: #ff6b35" id="d14" onclick="toggleDay('d14')">
+      <button class="check-btn">✓</button>
+      <div class="day-info">
+        <div class="day-name">Terça · 12 mai</div>
+        <div class="workout-name">🏃 Corrida 6k + 🧘 Yoga 19/20h</div>
+        <div class="workout-detail">Ritmo leve · foco na respiração</div>
+      </div>
+      <div class="type-chip">Duplo</div>
+    </div>
+
+    <div class="day-card" style="--type-color: #47c4ff" id="d15" onclick="toggleDay('d15')">
+      <button class="check-btn">✓</button>
+      <div class="day-info">
+        <div class="day-name">Quarta · 13 mai</div>
+        <div class="workout-name">💪 Musculação — Core + Superiores</div>
+        <div class="workout-detail">Último treino pesado de core</div>
+      </div>
+      <div class="type-chip">Força</div>
+    </div>
+
+    <div class="day-card" style="--type-color: #ff6b35" id="d16" onclick="toggleDay('d16')">
+      <button class="check-btn">✓</button>
+      <div class="day-info">
+        <div class="day-name">Quinta · 14 mai</div>
+        <div class="workout-name">🏃 Corrida 8k (longão decisivo) + 🧘 Yoga</div>
+        <div class="workout-detail">Se chegar bem aqui, a prova tá garantida</div>
+      </div>
+      <div class="type-chip">Duplo</div>
+    </div>
+
+    <div class="day-card" style="--type-color: #e8ff47" id="d17" onclick="toggleDay('d17')">
+      <button class="check-btn">✓</button>
+      <div class="day-info">
+        <div class="day-name">Sexta · 15 mai</div>
+        <div class="workout-name">💪 Musculação — Full Body muito leve</div>
+        <div class="workout-detail">Só mobilidade e ativação · não cansar</div>
+      </div>
+      <div class="type-chip">Força</div>
+    </div>
+
+    <div class="day-card" style="--type-color: #ff6b35" id="d18" onclick="toggleDay('d18')">
+      <button class="check-btn">✓</button>
+      <div class="day-info">
+        <div class="day-name">Sábado · 16 mai</div>
+        <div class="workout-name">🏃 Corrida 4k — bem leve</div>
+        <div class="workout-detail">Só ativar as pernas antes da prova</div>
+      </div>
+      <div class="type-chip">Corrida</div>
+    </div>
+
+    <div class="rest-card">
+      <div class="rest-icon">😴</div>
+      <div class="rest-text">Domingo · descanso total</div>
+    </div>
+
+    <div class="week-header">
+      <span class="week-label">Semana da prova · 14–17 mai</span>
+      <div class="week-line"></div>
+    </div>
+
+    <div class="day-card" style="--type-color: #ff6b35" id="d19" onclick="toggleDay('d19')">
+      <button class="check-btn">✓</button>
+      <div class="day-info">
+        <div class="day-name">Terça · 19 mai</div>
+        <div class="workout-name">🏃 Corrida 5k leve + 🧘 Yoga 19/20h</div>
+        <div class="workout-detail">Últimos ajustes · sem forçar nada</div>
+      </div>
+      <div class="type-chip">Duplo</div>
+    </div>
+
+    <div class="rest-card">
+      <div class="rest-icon">🚶</div>
+      <div class="rest-text">Quinta · descanso ou 20min caminhada</div>
+    </div>
+
+    <div class="day-card" style="--type-color: #e8ff47; border-color: var(--accent);" id="d20" onclick="toggleDay('d20')">
+      <button class="check-btn">✓</button>
+      <div class="day-info">
+        <div class="day-name">Domingo · 17 mai</div>
+        <div class="workout-name">🏆 8ª Corrida do Café — 10k!</div>
+        <div class="workout-detail">Centro Histórico · você treinou pra isso ☕</div>
+      </div>
+      <div class="type-chip">PROVA</div>
+    </div>
+
+  </div>
+
+  <!-- MUSCULAÇÃO PANEL -->
+  <div id="panel-musculacao" class="panel">
+
+    <div class="gym-section">
+      <div class="gym-section-title">💪 Treino A — Membros Inferiores · Segundas</div>
+
+      <div class="exercise-card">
+        <div>
+          <div class="exercise-name">Agachamento livre</div>
+          <div class="exercise-meta">Barra · foco em profundidade</div>
+        </div>
+        <div class="ex-chip compound">Composto</div>
+        <div class="sets-info">4 × 10</div>
+      </div>
+      <div class="exercise-card">
+        <div>
+          <div class="exercise-name">Leg press 45°</div>
+          <div class="exercise-meta">Pisada alta · ativa glúteo</div>
+        </div>
+        <div class="ex-chip compound">Composto</div>
+        <div class="sets-info">3 × 12</div>
+      </div>
+      <div class="exercise-card">
+        <div>
+          <div class="exercise-name">Stiff (terra romeno)</div>
+          <div class="exercise-meta">Halteres ou barra · posterior e glúteo</div>
+        </div>
+        <div class="ex-chip compound">Composto</div>
+        <div class="sets-info">4 × 10</div>
+      </div>
+      <div class="exercise-card">
+        <div>
+          <div class="exercise-name">Cadeira extensora</div>
+          <div class="exercise-meta">Unilateral se disponível</div>
+        </div>
+        <div class="ex-chip iso">Isolado</div>
+        <div class="sets-info">3 × 15</div>
+      </div>
+      <div class="exercise-card">
+        <div>
+          <div class="exercise-name">Mesa flexora</div>
+          <div class="exercise-meta">Posterior da coxa</div>
+        </div>
+        <div class="ex-chip iso">Isolado</div>
+        <div class="sets-info">3 × 12</div>
+      </div>
+      <div class="exercise-card">
+        <div>
+          <div class="exercise-name">Elevação de quadril (hip thrust)</div>
+          <div class="exercise-meta">Barra ou haltere · glúteo máximo</div>
+        </div>
+        <div class="ex-chip iso">Isolado</div>
+        <div class="sets-info">4 × 12</div>
+      </div>
+      <div class="exercise-card">
+        <div>
+          <div class="exercise-name">Panturrilha em pé</div>
+          <div class="exercise-meta">Máquina ou step</div>
+        </div>
+        <div class="ex-chip iso">Isolado</div>
+        <div class="sets-info">4 × 20</div>
+      </div>
+    </div>
+
+    <div class="gym-section">
+      <div class="gym-section-title">🧠 Treino B — Core + Superiores · Quartas</div>
+
+      <div class="exercise-card">
+        <div>
+          <div class="exercise-name">Remada curvada</div>
+          <div class="exercise-meta">Barra ou haltere · costas e bíceps</div>
+        </div>
+        <div class="ex-chip compound">Composto</div>
+        <div class="sets-info">4 × 10</div>
+      </div>
+      <div class="exercise-card">
+        <div>
+          <div class="exercise-name">Desenvolvimento com halteres</div>
+          <div class="exercise-meta">Sentada ou em pé · ombros</div>
+        </div>
+        <div class="ex-chip compound">Composto</div>
+        <div class="sets-info">3 × 12</div>
+      </div>
+      <div class="exercise-card">
+        <div>
+          <div class="exercise-name">Supino inclinado haltere</div>
+          <div class="exercise-meta">Peitoral superior</div>
+        </div>
+        <div class="ex-chip compound">Composto</div>
+        <div class="sets-info">3 × 12</div>
+      </div>
+      <div class="exercise-card">
+        <div>
+          <div class="exercise-name">Prancha frontal</div>
+          <div class="exercise-meta">30–60 seg · core profundo</div>
+        </div>
+        <div class="ex-chip core">Core</div>
+        <div class="sets-info">3 × 45s</div>
+      </div>
+      <div class="exercise-card">
+        <div>
+          <div class="exercise-name">Abdominal bicicleta</div>
+          <div class="exercise-meta">Controlado · oblíquos</div>
+        </div>
+        <div class="ex-chip core">Core</div>
+        <div class="sets-info">3 × 20</div>
+      </div>
+      <div class="exercise-card">
+        <div>
+          <div class="exercise-name">Superman / extensão lombar</div>
+          <div class="exercise-meta">No solo ou máquina · lombar</div>
+        </div>
+        <div class="ex-chip core">Core</div>
+        <div class="sets-info">3 × 15</div>
+      </div>
+      <div class="exercise-card">
+        <div>
+          <div class="exercise-name">Rosca direta + Tríceps corda</div>
+          <div class="exercise-meta">Superset · finaliza o treino</div>
+        </div>
+        <div class="ex-chip iso">Isolado</div>
+        <div class="sets-info">3 × 12</div>
+      </div>
+    </div>
+
+    <div class="gym-section">
+      <div class="gym-section-title">⚡ Treino C — Full Body Leve · Sextas</div>
+
+      <div class="exercise-card">
+        <div>
+          <div class="exercise-name">Agachamento goblet</div>
+          <div class="exercise-meta">Haltere · volume menor</div>
+        </div>
+        <div class="ex-chip compound">Composto</div>
+        <div class="sets-info">3 × 12</div>
+      </div>
+      <div class="exercise-card">
+        <div>
+          <div class="exercise-name">Puxada frontal (pulley)</div>
+          <div class="exercise-meta">Costas · amplitude completa</div>
+        </div>
+        <div class="ex-chip compound">Composto</div>
+        <div class="sets-info">3 × 12</div>
+      </div>
+      <div class="exercise-card">
+        <div>
+          <div class="exercise-name">Avanço com halteres</div>
+          <div class="exercise-meta">Estabilidade e glúteo</div>
+        </div>
+        <div class="ex-chip compound">Composto</div>
+        <div class="sets-info">3 × 10 cada</div>
+      </div>
+      <div class="exercise-card">
+        <div>
+          <div class="exercise-name">Elevação lateral</div>
+          <div class="exercise-meta">Ombro médio · peso leve</div>
+        </div>
+        <div class="ex-chip iso">Isolado</div>
+        <div class="sets-info">3 × 15</div>
+      </div>
+      <div class="exercise-card">
+        <div>
+          <div class="exercise-name">Prancha lateral</div>
+          <div class="exercise-meta">Core oblíquo · estabilidade</div>
+        </div>
+        <div class="ex-chip core">Core</div>
+        <div class="sets-info">3 × 30s cada</div>
+      </div>
+      <div class="exercise-card">
+        <div>
+          <div class="exercise-name">Alongamento guiado</div>
+          <div class="exercise-meta">10 min · panturrilha, IT band, quadril</div>
+        </div>
+        <div class="ex-chip core">Mobilidade</div>
+        <div class="sets-info">10 min</div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+  // COUNTDOWN
+  function updateCountdown() {
+    const race = new Date('2026-05-17T07:00:00-03:00');
+    const now = new Date();
+    const diff = Math.ceil((race - now) / (1000 * 60 * 60 * 24));
+    document.getElementById('countdown').textContent = diff > 0 ? diff : '🏁';
+  }
+  updateCountdown();
+
+  // TABS
+  function switchTab(name) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('panel-' + name).classList.add('active');
+    event.target.classList.add('active');
+  }
+
+  // TOGGLE DAY
+  const completed = JSON.parse(localStorage.getItem('treino_done') || '{}');
+
+  function toggleDay(id) {
+    const card = document.getElementById(id);
+    if (card.classList.contains('completed')) {
+      card.classList.remove('completed');
+      delete completed[id];
+    } else {
+      card.classList.add('completed');
+      completed[id] = true;
+    }
+    try { localStorage.setItem('treino_done', JSON.stringify(completed)); } catch(e) {}
+    updateProgress();
+  }
+
+  function updateProgress() {
+    const total = document.querySelectorAll('.day-card').length;
+    const done = Object.keys(completed).length;
+    const pct = total > 0 ? (done / total * 100) : 0;
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressCount').textContent = done + ' / ' + total;
+  }
+
+  // RESTORE STATE
+  Object.keys(completed).forEach(id => {
+    const card = document.getElementById(id);
+    if (card) card.classList.add('completed');
+  });
+  updateProgress();
+</script>
+</body>
+</html>
